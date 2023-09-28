@@ -53,31 +53,43 @@ def main():
         
         finally:
             # insert data
+            current_location = os.path.dirname(__file__)
+            dataset_location = os.path.join(current_location, "dataset", "dataset")
+            user_data = os.path.join(dataset_location, "Data")
+            
+            # insert users
             try:
-                current_location = os.path.dirname(__file__)
-                dataset_location = os.path.join(current_location, "dataset", "dataset")
-                user_data = os.path.join(dataset_location, "Data")
                 user_list = os.listdir(user_data)
+                label_file_path = os.path.join(dataset_location, "labeled_ids.txt")
 
                 labels = None
                 try:
-                    with open(os.path.join(user_data, "labeled_ids.txt"), "r") as file:
+                    with open(label_file_path, "r") as file:
                         labels = file.read()
                 except FileNotFoundError:
                     print("ERROR cant find file")
                 except Exception as e:
                     print("ERROR cant read labels file: ", e)
                 
-                print(user_list)
-                print(labels)
-                user_list_converted = [[s, 0] for s in user_list]
-                print(user_list_converted)
+                user_list_converted = []
+                for user_id in user_list:
+                    has_labels = 1 if user_id in labels else 0
+                    user_list_converted.append((user_id, has_labels))
 
-                # program.insert_data("INSERT INTO user (id, has_lable) VALUES (%s, %s)", user_list_converted)
+                # program.insert_data("INSERT INTO user (id, has_label) VALUES (%s, %s)", user_list_converted)
 
             except Exception as e:
-                print("ERROR: Failed inserting data: ", e)
+                print("ERROR: Failed inserting user: ", e)
+            finally:
+                print("-- inserted users")
 
+            # insert activitys
+            try:
+                
+            except Exception as e:
+                print("ERROR: Failed inserting activity: ", e)
+            finally:
+                print("-- inserted activity")
 
         
         
