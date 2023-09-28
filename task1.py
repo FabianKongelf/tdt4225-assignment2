@@ -99,8 +99,8 @@ def main():
                         with open(labels_path, "r") as file:
                             lines = file.readlines()[1:]
                             for line in lines:
-                                converted_line = line.strip().split(" ")
-                                converted_line = [user[0], converted_line[0] + " " + converted_line[1], converted_line[2] + " " + converted_line[3], converted_line[4]]
+                                array_line = line.strip().split(" ")
+                                converted_line = [user[0], array_line[0] + " " + array_line[1], array_line[2] + " " + array_line[3], array_line[4]]
                                 activities.append(converted_line)
 
                         program.insert_data("""INSERT INTO activity (user_id, start_date_time, end_date_time, transportation_mode) VALUES (%s, %s, %s, %s)""", activities)
