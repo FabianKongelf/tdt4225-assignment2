@@ -29,18 +29,28 @@ def main():
 
         # create tables
         try:
+            # user table
             program.create_table("""CREATE TABLE IF NOT EXISTS user (
                                  id VARCHAR(3) NOT NULL PRIMARY KEY, 
                                  has_label BOOLEAN DEFAULT FALSE)""")
+            
+            # activity table
             program.create_table("""CREATE TABLE IF NOT EXISTS activity (
                                  id INT AUTO_INCREMENT NOT NULL PRIMARY KEY, 
                                  user_id VARCHAR(3) NOT NULL, 
                                  transportation_mode VARCHAR(100),
-                                 start_date_time DATETIME,
-                                 end_date_time DATETIME)""")
-            program.create_table("""CREATE TABLE IF NOT EXISTS trackingpoint (
+                                 start_date_time DATETIME NOT NULL,
+                                 end_date_time DATETIME NOT NULL)""")
+            
+            # trackpoint
+            program.create_table("""CREATE TABLE IF NOT EXISTS trackpoint (
                                  id INT AUTO_INCREMENT NOT NULL PRIMARY KEY, 
-                                 has_label BOOLEAN DEFAULT FALSE)""")
+                                 activity_id INT NOT NULL,
+                                 lat DOUBLE PRECISION NOT NULL,
+                                 lon DOUBLE PRECISION NOT NULL,
+                                 altitude INT,
+                                 date_days DOUBLE PRECISION NOT NULL,
+                                 date_time DATETIME NOT NULL)""")
         
         except Exception as e:
             print("ERROR: Failed to create Table: ", e)
