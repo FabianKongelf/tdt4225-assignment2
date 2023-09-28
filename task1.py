@@ -1,5 +1,6 @@
 from DbConnector import DbConnector
 from tabulate import tabulate
+import os
 
 class Task1():
     def __init__(self):
@@ -11,14 +12,14 @@ class Task1():
         self.cursor.execute(query)
         self.db_connection.commit()
 
-    # def insert_data(self, table_name):
-    #     names = ['Bobby', 'Mc', 'McSmack', 'Board']
-    #     for name in names:
-    #         # Take note that the name is wrapped in '' --> '%s' because it is a string,
-    #         # while an int would be %s etc
-    #         query = "INSERT INTO %s (name) VALUES ('%s')"
-    #         self.cursor.execute(query % (table_name, name))
-    #     self.db_connection.commit()
+    def insert_data(self, table_name):
+        names = ['Bobby', 'Mc', 'McSmack', 'Board']
+        for name in names:
+            # Take note that the name is wrapped in '' --> '%s' because it is a string,
+            # while an int would be %s etc
+            query = "INSERT INTO %s (name) VALUES ('%s')"
+            self.cursor.execute(query % (table_name, name))
+        self.db_connection.commit()
 
 def main():
     program = None
@@ -32,7 +33,7 @@ def main():
             # user table
             program.create_table("""CREATE TABLE IF NOT EXISTS user (
                                  id VARCHAR(3) NOT NULL PRIMARY KEY, 
-                                 has_label BOOLEAN DEFAULT FALSE)""")
+                                 has_label BOOLEAN NOT NULL DEFAULT FALSE)""")
             
             # activity table
             program.create_table("""CREATE TABLE IF NOT EXISTS activity (
@@ -55,13 +56,24 @@ def main():
         except Exception as e:
             print("ERROR: Failed to create Table: ", e)
         
-        # finally:
-        #     # insert data
-        #     try:
-        #         program.insert_data()
+        finally:
+            # insert data
+            try:
+                current_location = os.path.dirname(__file__)
+                dataset_location = os.path.join(current_location, "dataset", "dataset")
+                user_data = os.path.join(dataset_location, "Data")
+                user_list = os.listdir(user_data)
 
-        #     except Exception as e:
-        #         print("ERROR: Failed inserting data: ", e)
+                try:
+                    with open(os.path.join(user_data, "labeled_ids.txt"), "r") as file:
+                        
+                
+
+
+                # program.insert_data()
+
+            except Exception as e:
+                print("ERROR: Failed inserting data: ", e)
 
 
         
