@@ -36,7 +36,8 @@ def main():
                                  user_id VARCHAR(3) NOT NULL, 
                                  transportation_mode VARCHAR(100),
                                  start_date_time DATETIME NOT NULL,
-                                 end_date_time DATETIME NOT NULL)""")
+                                 end_date_time DATETIME NOT NULL,
+                                 FOREIGN KEY (user_id) REFERENCES user(id))""")
             
             # trackpoint
             program.create_table("""CREATE TABLE IF NOT EXISTS trackpoint (
@@ -46,7 +47,8 @@ def main():
                                  lon DOUBLE PRECISION NOT NULL,
                                  altitude INT,
                                  date_days DOUBLE PRECISION NOT NULL,
-                                 date_time DATETIME NOT NULL)""")
+                                 date_time DATETIME NOT NULL,
+                                 FOREIGN KEY (activity_id) REFERENCES activity(id))""")
         
         except Exception as e:
             print("ERROR: Failed to create Table: ", e)
@@ -56,7 +58,8 @@ def main():
             current_location = os.path.dirname(__file__)
             dataset_location = os.path.join(current_location, "dataset", "dataset")
             user_data = os.path.join(dataset_location, "Data")
-            
+            user_list_converted = []
+
             # insert users
             try:
                 user_list = os.listdir(user_data)
@@ -71,12 +74,11 @@ def main():
                 except Exception as e:
                     print("ERROR cant read labels file: ", e)
                 
-                user_list_converted = []
                 for user_id in user_list:
                     has_labels = 1 if user_id in labels else 0
                     user_list_converted.append((user_id, has_labels))
 
-                # program.insert_data("INSERT INTO user (id, has_label) VALUES (%s, %s)", user_list_converted)
+                # program.insert_data("""INSERT INTO user (id, has_label) VALUES (%s, %s)""", user_list_converted)
 
             except Exception as e:
                 print("ERROR: Failed inserting user: ", e)
@@ -85,7 +87,47 @@ def main():
 
             # insert activitys
             try:
+                for user in user_list_converted:
+                    id = user[0]
+                    user_data_path = os.path.join(user_data, id)
+                    print(user)
+                    
+                    if user[1] == 1:
+                        # inseter labels
+                        activities = []
+                        labels_path = os.path.join(user_data_path, "labels.txt")
+                        with open(labels_path, "r") as file:
+                            lines = file.readlines()[1:]
+                            for line in lines:
+                                converted_line = line.strip().split(" ")
+                                converted_line = [user[0], converted_line[0] + " " + converted_line[1], converted_line[2] + " " + converted_line[3], converted_line[4]]
+                                activities.append(converted_line)
+
+                        program.insert_data("""INSERT INTO activity (user_id, start_date_time, end_date_time, transportation_mode) VALUES (%s, %s, %s, %s)""", activities)
+
+
+                    files_path = os.path.join(user_data_path, "Trajectory")
+                    files = os.listdir(files_path)
                 
+                    for file_name in files:
+                        file_path = os.path.join(files_path, file_name)
+
+                        file_data = []
+                        with open(file_path, "r") as file:
+                            lines = file.readlines()[6:]
+                            for line in lines:
+                                converted_line = line.strip().split(",")
+                                datetime = converted_line[-2] + " " + converted_line[-1]
+                                converted_line[-2:] = [datetime]
+                                file_data.append(converted_line)
+                        
+                        if user[1] == 0:
+                            user_activity = [id, file_data[0][5], file_data[-1][5]]
+
+
+                        # print(content)
+                    # print(data)
+
             except Exception as e:
                 print("ERROR: Failed inserting activity: ", e)
             finally:
