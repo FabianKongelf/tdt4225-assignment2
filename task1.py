@@ -90,7 +90,7 @@ def main():
                 for user in user_list_converted:
                     id = user[0]
                     user_data_path = os.path.join(user_data, id)
-                    print(user)
+                    # print(user)
                     
                     if user[1] == 1:
                         # inseter labels
@@ -100,14 +100,10 @@ def main():
                             lines = file.readlines()[1:]
                             for line in lines:
                                 array_line = line.strip().split("\t")
-                                print(array_line)
-                                # converted_line = [user[0], array_line[0] + " " + array_line[1], array_line[2] + " " + array_line[3], array_line[4]]
                                 array_line.append(user[0])
                                 activities.append(array_line)
 
                         program.insert_data("""INSERT INTO activity (start_date_time, end_date_time, transportation_mode, user_id) VALUES (%s, %s, %s, %s)""", activities)
-                    else:
-                        print("hei")
 
                     files_path = os.path.join(user_data_path, "Trajectory")
                     files = os.listdir(files_path)
