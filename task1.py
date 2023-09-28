@@ -11,15 +11,49 @@ class Task1():
         self.cursor.execute(query)
         self.db_connection.commit()
 
+    def insert_data(self, table_name):
+        names = ['Bobby', 'Mc', 'McSmack', 'Board']
+        for name in names:
+            # Take note that the name is wrapped in '' --> '%s' because it is a string,
+            # while an int would be %s etc
+            query = "INSERT INTO %s (name) VALUES ('%s')"
+            self.cursor.execute(query % (table_name, name))
+        self.db_connection.commit()
+
 def main():
     program = None
+
+    # init program
     try:
         program = Task1()
 
+        # create tables
         try:
-            program.create_table("""CREATE TABLE IF NOT EXISTS user (id VARCHAR(3) NOT NULL PRIMARY KEY, has_label BOOLEAN DEFAULT FALSE)""")
+            program.create_table("""CREATE TABLE IF NOT EXISTS user (
+                                 id VARCHAR(3) NOT NULL PRIMARY KEY, 
+                                 has_label BOOLEAN DEFAULT FALSE)""")
+            program.create_table("""CREATE TABLE IF NOT EXISTS activity (
+                                 id INT AUTO_INCREMENT NOT NULL PRIMARY KEY, 
+                                 user_id VARCHAR(3) NOT NULL, 
+                                 transportation_mode VARCHAR(100),
+                                 start_date_time DATETIME,
+                                 end_date_time DATETIME)""")
+            program.create_table("""CREATE TABLE IF NOT EXISTS trackingpoint (
+                                 id INT AUTO_INCREMENT NOT NULL PRIMARY KEY, 
+                                 has_label BOOLEAN DEFAULT FALSE)""")
         
-        except:
+        except Exception as e:
+            print("ERROR: Failed to create Table: ", e)
+        
+        finally:
+            # insert data
+            try:
+                program.insert_data()
+
+            except Exception as e:
+                print("ERROR: Failed inserting data: ", e)
+
+
         
         
         
@@ -28,8 +62,12 @@ def main():
         # program.drop_table(table_name="Person")
         # Check that the table is dropped
         # program.show_tables()
+    
+    # failed init program
     except Exception as e:
         print("ERROR: Failed to use database:", e)
+    
+    # after try-catch block is finished
     finally:
         if program:
             program.connection.close_connection()
