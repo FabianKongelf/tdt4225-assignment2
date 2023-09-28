@@ -12,13 +12,8 @@ class Task1():
         self.cursor.execute(query)
         self.db_connection.commit()
 
-    def insert_data(self, table_name):
-        names = ['Bobby', 'Mc', 'McSmack', 'Board']
-        for name in names:
-            # Take note that the name is wrapped in '' --> '%s' because it is a string,
-            # while an int would be %s etc
-            query = "INSERT INTO %s (name) VALUES ('%s')"
-            self.cursor.execute(query % (table_name, name))
+    def insert_data(self, query, data):
+        self.cursor.executemany(query, data)
         self.db_connection.commit()
 
 def main():
@@ -64,6 +59,7 @@ def main():
                 user_data = os.path.join(dataset_location, "Data")
                 user_list = os.listdir(user_data)
 
+                labels = None
                 try:
                     with open(os.path.join(user_data, "labeled_ids.txt"), "r") as file:
                         labels = file.read()
@@ -74,8 +70,10 @@ def main():
                 
                 print(user_list)
                 print(labels)
+                user_list_converted = [[s, 0] for s in user_list]
+                print(user_list_converted)
 
-                # program.insert_data()
+                # program.insert_data("INSERT INTO user (id, has_lable) VALUES (%s, %s)", user_list_converted)
 
             except Exception as e:
                 print("ERROR: Failed inserting data: ", e)
