@@ -66,9 +66,14 @@ def main():
 
                 try:
                     with open(os.path.join(user_data, "labeled_ids.txt"), "r") as file:
-                        
+                        labels = file.read()
+                except FileNotFoundError:
+                    print("ERROR cant find file")
+                except Exception as e:
+                    print("ERROR cant read labels file: ", e)
                 
-
+                print(user_list)
+                print(labels)
 
                 # program.insert_data()
 
