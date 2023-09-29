@@ -53,8 +53,8 @@ def main():
         except Exception as e:
             print("ERROR: Failed to create Table: ", e)
         
+        # insert data
         finally:
-            # insert data
             current_location = os.path.dirname(__file__)
             dataset_location = os.path.join(current_location, "dataset", "dataset")
             user_data = os.path.join(dataset_location, "Data")
@@ -81,7 +81,7 @@ def main():
                 # program.insert_data("""INSERT INTO user (id, has_label) VALUES (%s, %s)""", user_list_converted)
 
             except Exception as e:
-                print("ERROR: Failed inserting user: ", e)
+                print("ERROR: Failed inserting users: ", e)
             finally:
                 print("-- inserted users")
 
@@ -125,21 +125,12 @@ def main():
 
 
                         # print(content)
-                    # print(data)
+                    print("-- inserted data for: " + user[0])
 
             except Exception as e:
                 print("ERROR: Failed inserting activity: ", e)
             finally:
                 print("-- inserted activity")
-
-        
-        
-        
-        # program.insert_data(table_name="Person")
-        # _ = program.fetch_data(table_name="Person")
-        # program.drop_table(table_name="Person")
-        # Check that the table is dropped
-        # program.show_tables()
     
     # failed init program
     except Exception as e:
