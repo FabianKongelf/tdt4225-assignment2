@@ -123,6 +123,7 @@ def main():
 
                                 # correct datatime 
                                 datetime = converted_line[-2] + " " + converted_line[-1]
+                                datetime = datetime.replace("-", "/")
                                 converted_line[-2:] = [datetime]
 
                                 # ajust altitute
@@ -149,6 +150,7 @@ def main():
                         if user[1] == 1:
                             for row in lables:
                                 if row[0] == file_data[0][4] and row[1] == file_data[-1][4]:
+                                    # print(row[2])
                                     user_activity = [user_id, row[2], file_data[0][4], file_data[-1][4]]
                                     query = """INSERT INTO activity (user_id, transportation_mode, start_date_time, end_date_time) VALUES (%s, %s, %s, %s)"""
                         
