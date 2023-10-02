@@ -113,6 +113,8 @@ def main():
             print("The users with labeles most common transportation mode: ")
             print(tabulate(most_common, headers=["User", "Mode"]))
 
+            https://gitlab.stud.idi.ntnu.no/trymg/exercise-2-tdt4225/-/blob/master/src/main.py?ref_type=heads
+
 
         except Exception as e:
             print("ERROR: failed to do task2: ", e)
