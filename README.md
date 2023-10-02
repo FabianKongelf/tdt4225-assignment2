@@ -9,5 +9,3 @@ Assignment 2 in TDT4225
 # What
 
 # Install
-
-
