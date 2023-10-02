@@ -106,6 +106,14 @@ def main():
             print("All users how have invalid activities: ")
             print(tabulate(errors, headers=["User", "ant invalid"]))
 
+            print("\n----------------------------------\n")
+
+            #Task2.12
+            most_common = program.get_request(""" SELECT user_id, transportation_mode FROM activity WHERE transportation_mode IS NOT NULL GROUP BY user_id ORDER BY user_id ASC;""")
+            print("The users with labeles most common transportation mode: ")
+            print(tabulate(most_common, headers=["User", "Mode"]))
+
+
         except Exception as e:
             print("ERROR: failed to do task2: ", e)
 
