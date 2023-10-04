@@ -27,6 +27,8 @@ def main():
         # do task2
         try:
             # task2.1
+            print("total amount of rows in database")
+
             count_users = program.get_request("""select count(*) from user;""")
             print("ant users: " + str(count_users[0][0]))
 
@@ -88,6 +90,9 @@ def main():
             # close_calles = program.get_request("""""")
             # print("Users how have been close to each other: ")
             # print(tabulate(close_calles, headers=[]))
+
+            # select a1.user_id, a1.id, t1.lat, t1.lon, t1.date_days, sq.user_id, sq.id, sq.lat, sq.lon, sq.date_days from trackpoint t1 join activity a1 on t1.activity_id = a1.id join (select a2.user_id, a2.id, t2.lat, t2.lon, t2.date_days from trackpoint t2 join activity a2 on t2.activity_id = a2.id) as sq on sq.user_id <> a1.user_id and abs(t1.date_days - sq.date_days) < 0.00003472 limit 20;
+
 
             print("\n----------------------------------\n")
 
