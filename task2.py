@@ -1,6 +1,9 @@
 from DbConnector import DbConnector
 from tabulate import tabulate
 import os
+import pandas as pd
+import numpy as np
+import geopy.distance
 
 class Task2():
     def __init__(self):
@@ -94,11 +97,41 @@ def main():
 
             print("\n----------------------------------\n")
 
-            #Task2.10
-            # dist_mode = program.get_request("""""")
-            # print("Users how have traveled the longest with their respective transport mode: ")
-            # print(tabulate(dist_mode, headers=[]))
+            # #Task2.10
+            
+            # as geografical data requiers more complex mathematical formulas we opt to do the data processing outside of sql
+            modes = program.get_request("""select distinct(transportation_mode) as modes from activity;""")
+            for mode in modes:
+                if mode[0]: # filter out NULL value as it is unintresting
+                    user_distance = program.get_request("""select activity.user_id, activity.id, activity.transportation_mode, trackpoint.lat, trackpoint.lon from trackpoint join activity on activity.id = trackpoint.activity_id where activity.transportation_mode = "%s";""" % mode[0])
+                    df = pd.DataFrame(user_distance, columns=["user", "activity", "mode", "lat", "lon"])
+                    user_list = df["user"].unique()
+                    res = pd.DataFrame(user_list, columns=["user"])
+                    res["distance"] = float()
 
+                    all_activities = df["activity"].unique()
+                    for activity in all_activities:
+                        adf = df[df["activity"] == activity]
+                        adf = adf.reset_index(drop=True)
+
+                        tot_dis = 0
+                        for i in range(1, len(adf)):
+                            coord1 = (adf.at[(i-1), "lat"], adf.at[(i-1), "lon"])   
+                            coord2 = (adf.at[i, "lat"], adf.at[i, "lon"])
+                            tot_dis += geopy.distance.geodesic(coord1, coord2).km
+                        
+                        index = res.index[res["user"] == adf.iloc[0]["user"]]
+                        if not index.empty:
+                            index = index[0]
+                            
+                            tot_dis += res.at[index, "distance"]
+                            res.loc[index, "distance"] = round(tot_dis, 6)
+
+                    # print(res) 
+                    max_index = res["distance"].idxmax()
+                    row = res.iloc[max_index]
+                    print(mode[0], "\t - ", "user: ", row["user"], ", distance: ", row["distance"],"km", sep="")
+                                                
             print("\n----------------------------------\n")
 
             #Task2.11
@@ -113,7 +146,7 @@ def main():
             print("The users with labeles most common transportation mode: ")
             print(tabulate(most_common, headers=["User", "Mode"]))
 
-            https://gitlab.stud.idi.ntnu.no/trymg/exercise-2-tdt4225/-/blob/master/src/main.py?ref_type=heads
+            # "https://gitlab.stud.idi.ntnu.no/trymg/exercise-2-tdt4225/-/blob/master/src/main.py?ref_type=heads"
 
 
         except Exception as e:
