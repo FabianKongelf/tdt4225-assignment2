@@ -98,7 +98,8 @@ def main():
             print("\n----------------------------------\n")
 
             # #Task2.10
-            
+            print("Users who have traveled the futhest using a transportation mode: ")
+
             # as geografical data requiers more complex mathematical formulas we opt to do the data processing outside of sql
             modes = program.get_request("""select distinct(transportation_mode) as modes from activity;""")
             for mode in modes:
@@ -142,7 +143,7 @@ def main():
             print("\n----------------------------------\n")
 
             #Task2.12
-            most_common = program.get_request(""" SELECT user_id, transportation_mode FROM activity WHERE transportation_mode IS NOT NULL GROUP BY user_id ORDER BY user_id ASC;""")
+            most_common = program.get_request("""SELECT user_id, transportation_mode FROM activity WHERE transportation_mode IS NOT NULL GROUP BY user_id ORDER BY user_id, transportation_mode ASC;""")
             print("The users with labeles most common transportation mode: ")
             print(tabulate(most_common, headers=["User", "Mode"]))
 
