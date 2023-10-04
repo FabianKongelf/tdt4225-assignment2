@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 import geopy.distance
+# from datetime import datetime
 
 class Task2():
     def __init__(self):
@@ -104,31 +105,42 @@ def main():
             modes = program.get_request("""select distinct(transportation_mode) as modes from activity;""")
             for mode in modes:
                 if mode[0]: # filter out NULL value as it is unintresting
-                    user_distance = program.get_request("""select activity.user_id, activity.id, activity.transportation_mode, trackpoint.lat, trackpoint.lon from trackpoint join activity on activity.id = trackpoint.activity_id where activity.transportation_mode = "%s";""" % mode[0])
-                    df = pd.DataFrame(user_distance, columns=["user", "activity", "mode", "lat", "lon"])
+                    user_distance = program.get_request("""select activity.user_id, activity.id, activity.transportation_mode, trackpoint.lat, trackpoint.lon, trackpoint.date_time from trackpoint join activity on activity.id = trackpoint.activity_id where activity.transportation_mode = "%s";""" % mode[0])
+                    df = pd.DataFrame(user_distance, columns=["user", "activity", "mode", "lat", "lon", "datetime"])
                     user_list = df["user"].unique()
                     res = pd.DataFrame(user_list, columns=["user"])
                     res["distance"] = float()
 
-                    all_activities = df["activity"].unique()
-                    for activity in all_activities:
-                        adf = df[df["activity"] == activity]
-                        adf = adf.reset_index(drop=True)
+                    for user in user_list:
+                        udf = df[df["user"] == user]
+                        udf = udf.reset_index(drop=True)
+                        ubest = [float(), None]
 
-                        tot_dis = 0
-                        for i in range(1, len(adf)):
-                            coord1 = (adf.at[(i-1), "lat"], adf.at[(i-1), "lon"])   
-                            coord2 = (adf.at[i, "lat"], adf.at[i, "lon"])
-                            tot_dis += geopy.distance.geodesic(coord1, coord2).km
+                        all_activities = udf["activity"].unique()
+                        for activity in all_activities:
+                            adf = udf[udf["activity"] == activity]
+                            adf = adf.reset_index(drop=True)
+
+                            start_date = adf.at[0, "datetime"]
+                            end_date = adf.at[(len(adf)-1), "datetime"]
+
+                            if start_date.date() == end_date.date():
+                                tot_dis = 0
+                                for i in range(1, len(adf)):
+                                    coord1 = (adf.at[(i-1), "lat"], adf.at[(i-1), "lon"])   
+                                    coord2 = (adf.at[i, "lat"], adf.at[i, "lon"])
+                                    tot_dis += geopy.distance.geodesic(coord1, coord2).km
+
+                                if ubest[1] and ubest[1].date() == start_date.date():
+                                    ubest[0] += tot_dis
+                                elif ubest[0] < tot_dis:
+                                    ubest[0] = tot_dis
+                                    ubest[1] = start_date
                         
                         index = res.index[res["user"] == adf.iloc[0]["user"]]
                         if not index.empty:
-                            index = index[0]
-                            
-                            tot_dis += res.at[index, "distance"]
-                            res.loc[index, "distance"] = round(tot_dis, 6)
+                            res.loc[index[0], "distance"] = round(ubest[0], 6)
 
-                    # print(res) 
                     max_index = res["distance"].idxmax()
                     row = res.iloc[max_index]
                     print(mode[0], "\t - ", "user: ", row["user"], ", distance: ", row["distance"],"km", sep="")
