@@ -23,7 +23,7 @@ def main():
     # init program
     try:
         program = Task2()
-
+        
         # do task2
         try:
             # task2.1
@@ -70,8 +70,8 @@ def main():
             print("\n----------------------------------\n")
 
             #Task2.6, prob wrong need rewrite.
-            duplicates = program.get_request("""SELECT IFNULL(COUNT(subquery.duplicates), "no duplicates") as total_duplicates FROM (SELECT count(id) as duplicates FROM activity GROUP BY transportation_mode, start_date_time, end_date_time HAVING duplicates > 1) as subquery;""")
-            print(duplicates)
+            duplicates = program.get_request("""SELECT IFNULL(COUNT(subquery.duplicates), "no duplicates") as total_duplicates FROM (SELECT COUNT(id) as duplicates FROM activity GROUP BY transportation_mode, start_date_time, end_date_time HAVING duplicates > 1) as subquery;""")
+            print("ant duplicate activities: ", str(duplicates[0][0]))
 
             print("\n----------------------------------\n")
 
@@ -153,16 +153,21 @@ def main():
             print("\n----------------------------------\n")
 
             #Task2.11
-            errors = program.get_request("""SELECT activity.user_id, COUNT(DISTINCT(activity.id)) as 'invalid activities' FROM (SELECT t1.activity_id as activity_id, ABS(t2.date_days - t1.date_days) AS time_diff FROM trackpoint t1 JOIN trackpoint t2 on t1.activity_id = t2.activity_id and t1.id+1 = t2.id HAVING time_diff >= 0.00347222) as subquery JOIN activity on activity.id = subquery.activity_id GROUP BY activity.user_id;""")
-            print("All users how have invalid activities: ")
+            errors = program.get_request("""SELECT activity.user_id, COUNT(DISTINCT(activity.id)) as 'invalid activities' FROM (SELECT t1.activity_id as activity_id, ABS(t2.date_days - t1.date_days) AS time_diff FROM trackpoint t1 JOIN trackpoint t2 on t1.activity_id = t2.activity_id and t1.id+1 = t2.id HAVING time_diff >= 0.00347222) as subquery JOIN activity on activity.id = subquery.activity_id GROUP BY activity.user_id LIMIT 20;""")
+            print("All users how have invalid activities (limit 20): ")
             print(tabulate(errors, headers=["User", "ant invalid"]))
 
             print("\n----------------------------------\n")
 
             #Task2.12
-            most_common = program.get_request("""SELECT user_id, transportation_mode FROM activity WHERE transportation_mode IS NOT NULL GROUP BY user_id ORDER BY user_id, transportation_mode ASC;""")
+            most_common_data = program.get_request("""SELECT user_id, transportation_mode FROM activity WHERE transportation_mode IS NOT NULL;""")
+            
             print("The users with labeles most common transportation mode: ")
-            print(tabulate(most_common, headers=["User", "Mode"]))
+            
+            df = pd.DataFrame(most_common_data, columns=["user", "mode"])
+            for user in df["user"].unique():
+                common = df[df["user"] == user]["mode"].value_counts()[:1].index.tolist() # return first encounterd equaly common
+                print("User: ", user, ", most common transport mode: ", str(common[0]), sep="")
 
             # "https://gitlab.stud.idi.ntnu.no/trymg/exercise-2-tdt4225/-/blob/master/src/main.py?ref_type=heads"
 
