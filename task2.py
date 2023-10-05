@@ -105,7 +105,7 @@ def main():
             #     users = program.get_request("SELECT id FROM user;")
             #     user_ids = [row[0] for row in users]
             #     user_trackpoints = {}
-            #     print("hei")
+
             #     for user_id in user_ids:
             #         trackpoints = program.get_request(
             #             f"SELECT lat, lon, date_time FROM trackpoint WHERE activity_id IN (SELECT id FROM activity WHERE user_id = {user_id});")
@@ -131,7 +131,7 @@ def main():
             #     for user_id2, trackpoints2 in user_trackpoints.items():
             #         pair = tuple(sorted((user_id1, user_id2)))
             #         print("Testing pair:", pair)
-            #         if user_id1 == user_id2 or pair in pairs:
+            #         if user_id1 == user_id2 or pair in pairs or user_id1 > user_id2:
             #             print("Skipped:", pair)
             #             continue
 
@@ -150,14 +150,14 @@ def main():
             #                     valid_within_time += 1
 
             #             elapsed_time = time.time() - start_time
-            #             if elapsed_time >= 1/3:
-            #                 print(round(elapsed_time, 1), " seconds elapsed for pair:",
+            #             if elapsed_time >= 2/10:
+            #                 print(round(elapsed_time, 2), " seconds elapsed for pair:",
             #                       pair, "Checked rows:", row_count, "Valid rows within time:", valid_within_time)
             #                 break
             # with open('time_differences.pkl', 'wb') as file:
             #     print("Par:", pair, " Skrevet til fil")
             #     pickle.dump(time_differences, file)
-
+                
             # # Load the time differences from the file
             # with open('time_differences.pkl', 'rb') as file:
             #     time_differences = pickle.load(file)
@@ -192,7 +192,7 @@ def main():
             # print("\n----------------------------------\n")
 
             # #Task2.10
-            print("Users who have traveled the futhest using a transportation mode: ")
+            print("Users who have traveled the furthest using a transportation mode: ")
 
             # as geografical data requiers more complex mathematical formulas we opt to do the data processing outside of sql
             modes = program.get_request("""select distinct(transportation_mode) as modes from activity;""")
