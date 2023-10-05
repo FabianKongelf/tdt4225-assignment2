@@ -70,7 +70,7 @@ def main():
             print("\n----------------------------------\n")
 
             #Task2.6
-            duplicates = program.get_request("""SELECT user_id, start_date_time, end_date_time, transportation_mode FROM activity GROUP BY user_id, start_date_time, end_date_time, transportation_mode HAVING (Count(user_id) > 1) and (Count(start_date_time) > 1) and (Count(end_date_time) > 1) and (Count(transportation_mode) > 1);""")
+            duplicates = program.get_request("""SELECT user_id, start_date_time, end_date_time, transportation_mode, COUNT(*) FROM activity GROUP BY user_id, start_date_time, end_date_time, transportation_mode HAVING COUNT(*)>1;""")
             print(duplicates)
 
             print("\n----------------------------------\n")
