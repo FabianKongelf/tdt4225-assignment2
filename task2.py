@@ -98,11 +98,12 @@ def main():
             print("\nAll activites which last until the next day (limit 20, offset 630): ")
             print(tabulate(list_overnight_activites, headers=["Transportation mode", "User", "Duration"]))
 
-            # print("\n----------------------------------\n")
+            print("\n----------------------------------\n")
 
             # Task2.8
-            # # This Task is currently commented out since it takes a long time to run. Uncomment it if you want to see the results
-            # print ("TASK 2.8) - Find the number of users which have been close to each other in time and space\n")
+            # warning this Task takes a long time to run.
+            
+            print("TASK 2.8) - Find the number of users which have been close to each other in time and space\n")
 
             cache_file = 'user_trackpoints.pkl'
 
@@ -192,75 +193,77 @@ def main():
             print("The pairs:")
             print(tabulate(result_table, headers, tablefmt="grid"))		
            
-            # print("\n----------------------------------\n")
+            print("\n----------------------------------\n")
 
             #Task2.9
-            # # This Task is currently commented out since it takes a long time to run. Uncomment it if you want to see the results
-            # print ("TASK 2.9) - Find the top 15 users who have gained the most altitude meters\n")
-            # altitude_gain = program.get_request("""SELECT user_id, SUM(sq.hightgain) * 0.3048 as user_highgain FROM (SELECT ssq.user_id, ssq.activity_id, SUM(CASE WHEN ssq.diff > 0 THEN ssq.diff ELSE 0 END) as hightgain FROM (SELECT user_id, activity_id, altitude, altitude - LAG(altitude) OVER (ORDER BY activity_id) as diff FROM trackpoint JOIN activity on trackpoint.activity_id = activity.id) as ssq GROUP BY ssq.activity_id) as sq GROUP BY sq.user_id ORDER BY user_highgain DESC LIMIT 15;""")
-            # print("Users who have gained the most altitude (meters): \n")
-            # print(tabulate(altitude_gain, headers=["User", "Altitude gain (m)"]))
+            # warning this Task takes a long time to run.
+            print ("TASK 2.9) - Find the top 15 users who have gained the most altitude meters\n")
+            altitude_gain = program.get_request("""SELECT user_id, SUM(sq.hightgain) * 0.3048 as user_highgain FROM (SELECT ssq.user_id, ssq.activity_id, SUM(CASE WHEN ssq.diff > 0 THEN ssq.diff ELSE 0 END) as hightgain FROM (SELECT user_id, activity_id, altitude, altitude - LAG(altitude) OVER (ORDER BY activity_id) as diff FROM trackpoint JOIN activity on trackpoint.activity_id = activity.id) as ssq GROUP BY ssq.activity_id) as sq GROUP BY sq.user_id ORDER BY user_highgain DESC LIMIT 15;""")
+            print("Users who have gained the most altitude (meters): \n")
+            print(tabulate(altitude_gain, headers=["User", "Altitude gain (m)"]))
 
-            # print("\n----------------------------------\n")
+            print("\n----------------------------------\n")
 
             # Task2.10
-            # # This Task is currently commented out since it takes a long time to run. Uncomment it if you want to see the results
-            # print ("TASK 2.10) - Find the users that have traveled the longest total distance in one day for each transportation mode\n")
-            # print("Users who have traveled the furthest using a transportation mode: ")
-            # # as geografical data requiers more complex mathematical formulas we opt to do the data processing outside of sql
-            # modes = program.get_request("""select distinct(transportation_mode) as modes from activity;""")
-            # for mode in modes:
-            #     if mode[0]: # filter out NULL value as it is unintresting
-            #         user_distance = program.get_request("""select activity.user_id, activity.id, activity.transportation_mode, trackpoint.lat, trackpoint.lon, trackpoint.date_time from trackpoint join activity on activity.id = trackpoint.activity_id where activity.transportation_mode = "%s";""" % mode[0])
-            #         df = pd.DataFrame(user_distance, columns=["user", "activity", "mode", "lat", "lon", "datetime"])
-            #         user_list = df["user"].unique()
-            #         res = pd.DataFrame(user_list, columns=["user"])
-            #         res["distance"] = float()
+            # warning this Task takes a long time to run.
 
-            #         for user in user_list:
-            #             udf = df[df["user"] == user]
-            #             udf = udf.reset_index(drop=True)
-            #             ubest = [float(), None]
+            print ("TASK 2.10) - Find the users that have traveled the longest total distance in one day for each transportation mode\n")
+            print("Users who have traveled the furthest using a transportation mode: ")
+            
+            # as geografical data requiers more complex mathematical formulas we opt to do the data processing outside of sql
+            modes = program.get_request("""select distinct(transportation_mode) as modes from activity;""")
+            for mode in modes:
+                if mode[0]: # filter out NULL value as it is unintresting
+                    user_distance = program.get_request("""select activity.user_id, activity.id, activity.transportation_mode, trackpoint.lat, trackpoint.lon, trackpoint.date_time from trackpoint join activity on activity.id = trackpoint.activity_id where activity.transportation_mode = "%s";""" % mode[0])
+                    df = pd.DataFrame(user_distance, columns=["user", "activity", "mode", "lat", "lon", "datetime"])
+                    user_list = df["user"].unique()
+                    res = pd.DataFrame(user_list, columns=["user"])
+                    res["distance"] = float()
 
-            #             all_activities = udf["activity"].unique()
-            #             for activity in all_activities:
-            #                 adf = udf[udf["activity"] == activity]
-            #                 adf = adf.reset_index(drop=True)
+                    for user in user_list:
+                        udf = df[df["user"] == user]
+                        udf = udf.reset_index(drop=True)
+                        ubest = [float(), None]
 
-            #                 start_date = adf.at[0, "datetime"]
-            #                 end_date = adf.at[(len(adf)-1), "datetime"]
+                        all_activities = udf["activity"].unique()
+                        for activity in all_activities:
+                            adf = udf[udf["activity"] == activity]
+                            adf = adf.reset_index(drop=True)
 
-            #                 if start_date.date() == end_date.date():
-            #                     tot_dis = 0
-            #                     for i in range(1, len(adf)):
-            #                         coord1 = (adf.at[(i-1), "lat"], adf.at[(i-1), "lon"])   
-            #                         coord2 = (adf.at[i, "lat"], adf.at[i, "lon"])
-            #                         tot_dis += geopy.distance.geodesic(coord1, coord2).km
+                            start_date = adf.at[0, "datetime"]
+                            end_date = adf.at[(len(adf)-1), "datetime"]
 
-            #                     if ubest[1] and ubest[1].date() == start_date.date():
-            #                         ubest[0] += tot_dis
-            #                     elif ubest[0] < tot_dis:
-            #                         ubest[0] = tot_dis
-            #                         ubest[1] = start_date
+                            if start_date.date() == end_date.date():
+                                tot_dis = 0
+                                for i in range(1, len(adf)):
+                                    coord1 = (adf.at[(i-1), "lat"], adf.at[(i-1), "lon"])   
+                                    coord2 = (adf.at[i, "lat"], adf.at[i, "lon"])
+                                    tot_dis += geopy.distance.geodesic(coord1, coord2).km
+
+                                if ubest[1] and ubest[1].date() == start_date.date():
+                                    ubest[0] += tot_dis
+                                elif ubest[0] < tot_dis:
+                                    ubest[0] = tot_dis
+                                    ubest[1] = start_date
                         
-            #             index = res.index[res["user"] == adf.iloc[0]["user"]]
-            #             if not index.empty:
-            #                 res.loc[index[0], "distance"] = round(ubest[0], 6)
+                        index = res.index[res["user"] == adf.iloc[0]["user"]]
+                        if not index.empty:
+                            res.loc[index[0], "distance"] = round(ubest[0], 6)
 
-            #         max_index = res["distance"].idxmax()
-            #         row = res.iloc[max_index]
-            #         print(mode[0], "\t - ", "user: ", row["user"], ", distance: ", row["distance"],"km", sep="")
+                    max_index = res["distance"].idxmax()
+                    row = res.iloc[max_index]
+                    print(mode[0], "\t - ", "user: ", row["user"], ", distance: ", row["distance"],"km", sep="")
                                                 
-            # print("\n----------------------------------\n")
+            print("\n----------------------------------\n")
 
             #Task2.11
-            # # This Task is currently commented out since it takes a long time to run. Uncomment it if you want to see the results
-            # print ("TASK 2.11) - Find all users who have invalid activities, and the number of invalid activities per use.\n")
-            # errors = program.get_request("""SELECT activity.user_id, COUNT(DISTINCT(activity.id)) as 'invalid activities' FROM (SELECT t1.activity_id as activity_id, ABS(t2.date_days - t1.date_days) AS time_diff FROM trackpoint t1 JOIN trackpoint t2 on t1.activity_id = t2.activity_id and t1.id+1 = t2.id HAVING time_diff >= 0.00347222) as subquery JOIN activity on activity.id = subquery.activity_id GROUP BY activity.user_id LIMIT 20;""")
-            # print("All users how have invalid activities (limit 20): \n")
-            # print(tabulate(errors, headers=["User", "ant invalid"]))
+            # warning this Task takes a long time to run.
+            print ("TASK 2.11) - Find all users who have invalid activities, and the number of invalid activities per use.\n")
+            errors = program.get_request("""SELECT activity.user_id, COUNT(DISTINCT(activity.id)) as 'invalid activities' FROM (SELECT t1.activity_id as activity_id, ABS(t2.date_days - t1.date_days) AS time_diff FROM trackpoint t1 JOIN trackpoint t2 on t1.activity_id = t2.activity_id and t1.id+1 = t2.id HAVING time_diff >= 0.00347222) as subquery JOIN activity on activity.id = subquery.activity_id GROUP BY activity.user_id LIMIT 20;""")
+            print("All users how have invalid activities (limit 20): \n")
+            print(tabulate(errors, headers=["User", "ant invalid"]))
 
-            # print("\n----------------------------------\n")
+            print("\n----------------------------------\n")
 
             #Task2.12
             print ("TASK 2.12) - Find all users who have registered transportation_mode and their most used transportation_mode\n")
@@ -272,9 +275,6 @@ def main():
             for user in df["user"].unique():
                 common = df[df["user"] == user]["mode"].value_counts()[:1].index.tolist() # return first encounterd equaly common
                 print("User: ", user, ", most common transport mode: ", str(common[0]), sep="")
-
-            # "https://gitlab.stud.idi.ntnu.no/trymg/exercise-2-tdt4225/-/blob/master/src/main.py?ref_type=heads"
-
 
         except Exception as e:
             print("ERROR: failed to do task2: ", e)
