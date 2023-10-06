@@ -51,30 +51,30 @@ def main():
             print("min trackpoints: ", avgminmax_trackpoints[0][1])
             print("max trackpoints: ", avgminmax_trackpoints[0][2])
 
-            print("\n----------------------------------\n")
+            # print("\n----------------------------------\n")
 
             # task2.3
             top15_highest_activites = program.get_request("""SELECT activity.user_id, COUNT(activity.id) AS total_activities FROM activity GROUP BY activity.user_id ORDER BY total_activities DESC LIMIT 15;""")
             print("Top 15 users highest activites \n")
             print(tabulate(top15_highest_activites, headers=["User", "Activities"]))
 
-            print("\n----------------------------------\n")
+            # print("\n----------------------------------\n")
 
-            #task2.4
+            # #task2.4
             user_bus = program.get_request("""SELECT user_id FROM activity WHERE transportation_mode = "bus" GROUP BY user_id;""")
             print("Users who have taken the bus\n")
             print(tabulate(user_bus, headers=["User"]))
 
-            print("\n----------------------------------\n")
+            # print("\n----------------------------------\n")
 
-            # #Task2.5
+            #Task2.5
             diff_transport = program.get_request("""SELECT user_id, COUNT(DISTINCT transportation_mode) as distinct_mode FROM activity GROUP BY user_id ORDER BY distinct_mode DESC LIMIT 10;""")
             print("Top 10 users by the amount of different transportation modes \n")
             print(tabulate(diff_transport, headers=["User", "Different transportation modes"]))
 
-            print("\n----------------------------------\n")
+            # print("\n----------------------------------\n")
 
-            # #Task2.6
+            # # #Task2.6
             duplicates = program.get_request("""SELECT user_id, start_date_time, end_date_time, transportation_mode, COUNT(*) FROM activity GROUP BY user_id, start_date_time, end_date_time, transportation_mode HAVING COUNT(*)>1;""")
             print(duplicates)
 
@@ -84,7 +84,7 @@ def main():
             overnight_users = program.get_request("""SELECT COUNT(DISTINCT user_id) as Overnight_users FROM activity WHERE DATEDIFF(start_date_time, end_date_time) <> 0 AND DATEDIFF(start_date_time, end_date_time) <= 1;""")
             print("Total users who have an activity which last until the next day: " + str(overnight_users[0][0]))
 
-            # #Task2.7b
+            # # #Task2.7b
             list_overnight_activites = program.get_request("""SELECT IFNULL(transportation_mode, "-"), user_id, TIMEDIFF(end_date_time, start_date_time) as duration FROM activity WHERE DATEDIFF(start_date_time, end_date_time) <> 0 AND DATEDIFF(start_date_time, end_date_time) <= 1 LIMIT 20 OFFSET 620;""")
             print("\nAll activites which last until the next day (limit 20, offset 630): ")
             print(tabulate(list_overnight_activites, headers=["Transportation mode", "User", "Duration"]))
@@ -94,92 +94,94 @@ def main():
             #Task2.8
             # This Task is currently commented out, since it takes a long time to run.
 
-            # cache_file = 'user_trackpoints.pkl'
-            # time_differences_file = 'time_differences.pkl'
+#             cache_file = 'user_trackpoints.pkl'
 
-            # if os.path.isfile(cache_file):
-            #     # If the cache file exists, load the data from it
-            #     with open(cache_file, 'rb') as file:
-            #         user_trackpoints = pickle.load(file)
-            # else:
-            #     users = program.get_request("SELECT id FROM user;")
-            #     user_ids = [row[0] for row in users]
-            #     user_trackpoints = {}
+#             # Load data from cache or query database if not cached
+#             if os.path.isfile(cache_file):
+#                 with open(cache_file, 'rb') as file:
+#                     user_trackpoints = pickle.load(file)
+#             else:
+#                 users = program.get_request("SELECT id FROM user;")
+#                 user_ids = [row[0] for row in users]
+#                 user_trackpoints = {}
 
-            #     for user_id in user_ids:
-            #         trackpoints = program.get_request(
-            #             f"SELECT lat, lon, date_time FROM trackpoint WHERE activity_id IN (SELECT id FROM activity WHERE user_id = {user_id});")
-            #         trackpoints = [(lat, lon, time.timestamp())
-            #                        for lat, lon, time in trackpoints]
+#                 for user_id in user_ids:
+#                     trackpoints = program.get_request(
+#                         f"SELECT lat, lon, date_time FROM trackpoint WHERE activity_id IN (SELECT id FROM activity WHERE user_id = {user_id});")
+#                     trackpoints = [(lat, lon, time.timestamp())
+#                                    for lat, lon, time in trackpoints]
 
-            #         user_trackpoints[user_id] = trackpoints
-            #         print(user_id)
+#                     user_trackpoints[user_id] = trackpoints
+#                     print(user_id)
 
-            #     with open(cache_file, 'wb') as file:
-            #         pickle.dump(user_trackpoints, file)
+#                 with open(cache_file, 'wb') as file:
+#                     pickle.dump(user_trackpoints, file)
 
-            # pairs = set()
-            # time_differences = []
-            # if os.path.isfile(time_differences_file):
-            #     # If the file exists, load the stored time differences
-            #     with open(time_differences_file, 'rb') as file:
-            #         time_differences = pickle.load(file)
-            # else:
-            #     # Initialize the start time
-            #     start_time = time.time()
-            # for user_id1, trackpoints1 in user_trackpoints.items():
-            #     for user_id2, trackpoints2 in user_trackpoints.items():
-            #         pair = tuple(sorted((user_id1, user_id2)))
-            #         print("Testing pair:", pair)
-            #         if user_id1 == user_id2 or pair in pairs or user_id1 > user_id2:
-            #             print("Skipped:", pair)
-            #             continue
+#             # Initialize the start time for the entire process
+#             total_start_time = time.time()
 
-            #         start_time = time.time()
-            #         row_count = 0
-            #         valid_within_time = 0
-            #         for trackpoint1 in trackpoints1:
-            #             lat1, lon1, time1 = trackpoint1
-            #             for trackpoint2 in trackpoints2:
-            #                 lat2, lon2, time2 = trackpoint2
+#             pairs = set()
+#             result_table = []
 
-            #                 timediff = abs(time1 - time2)
-            #                 row_count += 1
-            #                 if timediff <= 30:
-            #                     time_differences.append((pair, timediff))
-            #                     valid_within_time += 1
+#             # Iterate through pairs and perform comparisons
+#             user_ids = list(user_trackpoints.keys())
+#             max_running_time = 0.01  # Max running time for elapsed time
 
-            #             elapsed_time = time.time() - start_time
-            #             if elapsed_time >= 2/10:
-            #                 print(round(elapsed_time, 2), " seconds elapsed for pair:",
-            #                       pair, "Checked rows:", row_count, "Valid rows within time:", valid_within_time)
-            #                 break
-            # with open('time_differences.pkl', 'wb') as file:
-            #     print("Par:", pair, " Skrevet til fil")
-            #     pickle.dump(time_differences, file)
-                
-            # # Load the time differences from the file
-            # with open('time_differences.pkl', 'rb') as file:
-            #     time_differences = pickle.load(file)
+# # Iterate through pairs and perform comparisons
+#             for i in range(len(user_ids)):
+#                 user_id1 = user_ids[i]
+#                 for j in range(i + 1, len(user_ids)):
+#                     user_id2 = user_ids[j]
+#                     pair = (user_id1, user_id2)
+#                     #print("Testing pair:", pair)
 
-            # for pair, timediff in time_differences:
-            #     user_id1, user_id2 = pair
-            #     trackpoints1 = user_trackpoints[user_id1]
-            #     trackpoints2 = user_trackpoints[user_id2]
+#                     start_time = time.time()
+#                     row_count = 0
+#                     valid_pair_found = False
 
-            #     for trackpoint1 in trackpoints1:
-            #         lat1, lon1 = trackpoint1
+#                     for trackpoint1 in user_trackpoints[user_id1]:
+#                         lat1, lon1, time1 = trackpoint1
+#                         for trackpoint2 in user_trackpoints[user_id2]:
+#                             lat2, lon2, time2 = trackpoint2
+#                             timediff = abs(time1 - time2)
+#                             distance = round(
+#                                 haversine((lat1, lon1), (lat2, lon2), unit=Unit.METERS), 1)
+#                             row_count += 1
+#                             if timediff <= 30 and distance <= 50:
+#                                 pairs.add(pair)
+#                                 result_table.append(
+#                                     [pair, timediff, distance, row_count])
+#                                 print("Valid pair:", pair, ", Timediff:",
+#                                       timediff, ", Distance:", distance, ", Rows compared:", row_count)
+#                                 valid_pair_found = True
+#                                 break
 
-            #         for trackpoint2 in trackpoints2:
-            #             lat2, lon2 = trackpoint2
+#                             elapsed_time = time.time() - start_time
+#                             if elapsed_time > max_running_time:
+#                                 valid_pair_found = True
+#                                 break
 
-            #             distance = haversine(
-            #                 (lat1, lon1), (lat2, lon2), unit=Unit.METERS)
+#                         if valid_pair_found:
+#                             break  # Break the outer loop
 
-            #             if distance <= 50:
-            #                 pairs.add(pair)
-            #                 print("Valid pair within time and distance:", pair)
-            # print(len("Amount of pairs:", pairs))
+#             # Calculate the total elapsed time for pair comparisons only
+#             total_elapsed_time = time.time() - total_start_time
+
+#             # Convert total elapsed time into minutes and seconds
+#             total_minutes = int(total_elapsed_time // 60)
+#             total_seconds = total_elapsed_time % 60
+
+#             pair_count = len(result_table)
+#             print()
+#             print(
+#                 f"Total elapsed time for pair comparisons: {total_minutes} minutes {total_seconds:.2f} seconds")
+#             print("Time limit for comparing each pair:", max_running_time)
+#             print("Amount of pairs:", pair_count)
+#             headers = ["Pair", "Timediff", "Distance",
+#                        "Rows compared until match"]
+#             print("The pairs:")
+#             print(tabulate(result_table, headers, tablefmt="grid"))		
+           
 
 
             # print("\n----------------------------------\n")
@@ -189,7 +191,7 @@ def main():
             print("Users whw have gained the most altitude (meters): \n")
             print(tabulate(altitude_gain, headers=["User", "Altitude gain (m)"]))
 
-            # print("\n----------------------------------\n")
+            print("\n----------------------------------\n")
 
             # #Task2.10
             print("Users who have traveled the furthest using a transportation mode: ")
